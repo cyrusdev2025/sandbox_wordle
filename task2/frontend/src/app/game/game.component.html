@@ -5,6 +5,7 @@
     <div class="game-stats">
       <span class="session-id">Session: {{ sessionId.substring(0, 8) }}...</span>
       <span class="trials-remaining">Remaining: {{ remainingTrials }}/{{ maxTrials }}</span>
+      <span class="score-display">Score: {{ currentScore }}</span>
     </div>
   </header>
 
@@ -89,6 +90,7 @@
       </p>
       <div class="game-over-stats">
         <p>Guesses used: {{ guesses.length }}/{{ maxTrials }}</p>
+        <p>Final Score: {{ currentScore }}</p>
         <p>Your guesses: {{ guesses.join(', ').toUpperCase() }}</p>
       </div>
       <button class="new-game-button" (click)="startNewGame()">

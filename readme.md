@@ -29,3 +29,16 @@ task 2 is a client and server side application.
 - navigate to the task2\frontend directory
 - npm install
 - ng serve
+
+## Task 3
+task 3 is implementing a cheating mode in the game.
+- The cheating mode is implemented in the backend.
+- The system will select the best answer from the candidates to maximize difficulty.
+- score is calculated based on the number of hits and presents. (no of hit * 2 + no of present)
+
+## setup instruction
+- navigate to the task2\backend directory
+- dotnet run
+- navigate to the task2\frontend directory
+- npm install
+- ng serve

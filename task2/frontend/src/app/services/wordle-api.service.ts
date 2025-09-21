@@ -27,6 +27,7 @@ export interface ValidateSessionResponse {
   guessFeedback: string[][];
   usedCharacters: string[];
   expiresAt: string;
+  score: number;
 }
 
 export interface SubmitGuessRequest {
@@ -37,9 +38,11 @@ export interface SubmitGuessRequest {
 export interface SubmitGuessResponse {
   feedback: string[];
   isCorrect: boolean;
-  gameOver: boolean;
+  isGameCompleted: boolean;
+  isWon: boolean;
   remainingTrials: number;
-  answer?: string;
+  usedCharacters: string[];
+  score: number;
 }
 
 @Injectable({

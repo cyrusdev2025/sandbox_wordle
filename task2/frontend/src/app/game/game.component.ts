@@ -27,6 +27,8 @@ export class GameComponent implements OnInit, OnDestroy {
   popupTitle: string = '';
   popupMessage: string = '';
   correctAnswer: string = '';
+  currentScore: number = 0;
+  highestScore: number = 0;
 
   private wordleApiService = inject(WordleApiService);
   private router = inject(Router);
@@ -34,6 +36,9 @@ export class GameComponent implements OnInit, OnDestroy {
   constructor() {
     // Simply get session ID for display - no validation here
     this.sessionId = this.wordleApiService.getSessionId() || '';
+    
+    // Load highest score from localStorage
+    this.highestScore = this.getHighestScore();
     
     // If no session ID, redirect to home
     if (!this.sessionId) {
@@ -57,6 +62,7 @@ export class GameComponent implements OnInit, OnDestroy {
       this.remainingTrials = validationResponse.remainingTrials;
       this.gameOver = validationResponse.isCompleted;
       this.isWon = validationResponse.isWon;
+      this.currentScore = validationResponse.score;
       
       // Load past guesses and feedback
       this.guesses = validationResponse.triedGuesses || [];
@@ -162,19 +168,22 @@ export class GameComponent implements OnInit, OnDestroy {
       this.guessFeedback.push(response.feedback);
       this.updateKeyboardState(this.currentGuess, response.feedback);
       this.remainingTrials = response.remainingTrials;
+      this.currentScore = response.score;
       this.currentGuess = '';
 
       // Check game outcome
       if (response.isCorrect) {
         this.gameOver = true;
         this.isWon = true;
+        this.updateHighestScore();
         this.showWinPopup();
         // Clear session from localStorage when game is won
         this.wordleApiService.clearSession();
-      } else if (response.gameOver || this.remainingTrials <= 0) {
+      } else if (response.isGameCompleted || this.remainingTrials <= 0) {
         this.gameOver = true;
         this.isWon = false;
-        this.correctAnswer = response.answer || '';
+        this.correctAnswer = '';
+        this.updateHighestScore();
         this.showLosePopup();
         // Clear session from localStorage when game is lost
         this.wordleApiService.clearSession();
@@ -273,5 +282,19 @@ export class GameComponent implements OnInit, OnDestroy {
   getEmptyRows(): number[] {
     const emptyRowCount = this.maxTrials - this.guesses.length - (this.gameOver ? 0 : 1);
     return Array(Math.max(0, emptyRowCount)).fill(0).map((_, i) => i);
+  }
+
+  // Get highest score from localStorage
+  getHighestScore(): number {
+    const stored = localStorage.getItem('wordle-highest-score');
+    return stored ? parseInt(stored, 10) : 0;
+  }
+
+  // Update highest score if current score is higher
+  updateHighestScore(): void {
+    if (this.currentScore > this.highestScore) {
+      this.highestScore = this.currentScore;
+      localStorage.setItem('wordle-highest-score', this.highestScore.toString());
+    }
   }
 }

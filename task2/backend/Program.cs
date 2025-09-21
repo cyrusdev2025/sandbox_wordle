@@ -31,11 +31,11 @@ app.UseCors("AllowAngularApp");
 // app.UseHttpsRedirection();
 
 // Wordle Game API Endpoints
-app.MapPost("/start", async (IGameSessionService gameService) =>
+app.MapPost("/start", async (StartGameRequest? request, IGameSessionService gameService) =>
 {
     try
     {
-        var response = await gameService.StartNewGameAsync();
+        var response = await gameService.StartGameAsync(request);
         return Results.Ok(response);
     }
     catch (Exception ex)

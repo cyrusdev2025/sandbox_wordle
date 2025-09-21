@@ -42,7 +42,7 @@ public static class WordleGameLogic
                 }
                 if (!found)
                 {
-                    result[i] = "absent";
+                    result[i] = "miss";
                 }
             }
         }

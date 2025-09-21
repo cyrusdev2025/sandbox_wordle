@@ -2,7 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 public interface IGameSessionService
 {
-    Task<StartGameResponse> StartNewGameAsync();
+    Task<StartGameResponse> StartGameAsync(StartGameRequest? request = null);
     Task<ValidateSessionResponse> ValidateSessionAsync(string sessionId);
     Task<SubmitGuessResponse> SubmitGuessAsync(SubmitGuessRequest request);
     Task CleanupExpiredSessionsAsync();
@@ -21,29 +21,34 @@ public class GameSessionService : IGameSessionService
         _logger = logger;
     }
 
-    public async Task<StartGameResponse> StartNewGameAsync()
+    public async Task<StartGameResponse> StartGameAsync(StartGameRequest? request = null)
     {
         var sessionId = Guid.NewGuid().ToString();
-        var words = _configuration["WORDS"]?.Split(',').Select(w => w.Trim()).ToArray() ?? new[] { "apple", "girls", "sunny" };
-        var answer = WordleGameLogic.SelectRandomWord(words);
-        var maxTrials = int.Parse(_configuration["MAXIMUM_TRIALS"] ?? "3");
         var sessionTimeoutMinutes = int.Parse(_configuration["SESSION_TIMEOUT_MINUTES"] ?? "30");
-        var expiresAt = DateTime.UtcNow.AddMinutes(sessionTimeoutMinutes);
-
+        var maxTrials = int.Parse(_configuration["MAXIMUM_TRIALS"] ?? "6");
+        var wordsConfig = _configuration["WORDS"] ?? "apple,girls,sunny";
+        var words = wordsConfig.Split(',').Select(w => w.Trim().ToLower()).ToArray();
+        
+        var isCheatingMode = request?.IsCheatingMode ?? true;
+        var selectedWord = isCheatingMode ? string.Empty : WordleGameLogic.SelectRandomWord(words);
+        
         var session = new GameSession
         {
             SessionId = sessionId,
-            Answer = answer.ToLower(),
+            Answer = selectedWord,
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = expiresAt,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(sessionTimeoutMinutes),
             MaxTrials = maxTrials,
+            IsCheatingMode = isCheatingMode,
+            AllWords = isCheatingMode ? words.ToList() : new List<string>(),
+            RemainingCandidates = isCheatingMode ? words.ToList() : new List<string>(),
             IsCompleted = false,
             IsWon = false
         };
 
         var cacheOptions = new MemoryCacheEntryOptions
         {
-            AbsoluteExpiration = expiresAt,
+            AbsoluteExpiration = session.ExpiresAt,
             SlidingExpiration = TimeSpan.FromMinutes(sessionTimeoutMinutes)
         };
 
@@ -55,7 +60,7 @@ public class GameSessionService : IGameSessionService
         {
             SessionId = sessionId,
             MaxTrials = maxTrials,
-            ExpiresAt = expiresAt
+            ExpiresAt = session.ExpiresAt
         };
     }
 
@@ -100,7 +105,8 @@ public class GameSessionService : IGameSessionService
                 TriedGuesses = session.Guesses.Select(g => g.Guess).ToList(),
                 GuessFeedback = session.Guesses.Select(g => g.Feedback).ToList(),
                 UsedCharacters = session.UsedCharacters.ToList(),
-                ExpiresAt = session.ExpiresAt
+                ExpiresAt = session.ExpiresAt,
+                Score = session.CalculateScore()
             };
         }
 
@@ -139,9 +145,33 @@ public class GameSessionService : IGameSessionService
             throw new ArgumentException("Guess must contain only alphabetic characters");
         }
 
-        // Evaluate the guess
-        var feedback = WordleGameLogic.EvaluateGuess(guess, session.Answer);
-        var isCorrect = guess == session.Answer;
+        string[] feedback;
+        bool isCorrect;
+        
+        if (session.IsCheatingMode)
+        {
+            // Use cheating logic
+            var cheatingResult = CheatingWordleLogic.ProcessCheatingGuess(
+                guess, 
+                session.AllWords, 
+                session.Guesses);
+            
+            // Update session with selected answer
+            session.Answer = cheatingResult.SelectedAnswer;
+            session.RemainingCandidates = cheatingResult.RemainingCandidates;
+            
+            feedback = cheatingResult.Feedback;
+            isCorrect = guess.Equals(session.Answer, StringComparison.OrdinalIgnoreCase);
+            
+            _logger.LogInformation("Cheating mode - Selected answer: {Answer}, Reason: {Reason}, Remaining: {Count}", 
+                session.Answer, cheatingResult.SelectionReason, session.RemainingCandidates.Count);
+        }
+        else
+        {
+            // Normal mode
+            feedback = WordleGameLogic.EvaluateGuess(guess, session.Answer);
+            isCorrect = guess.Equals(session.Answer, StringComparison.OrdinalIgnoreCase);
+        }
 
         var guessResult = new GuessResult
         {
@@ -187,9 +217,11 @@ public class GameSessionService : IGameSessionService
         {
             Feedback = feedback,
             IsCorrect = isCorrect,
-            GameOver = session.IsCompleted,
+            IsGameCompleted = session.IsCompleted,
+            IsWon = session.IsWon,
             RemainingTrials = session.MaxTrials - session.Guesses.Count,
-            Answer = session.IsCompleted ? session.Answer.ToUpper() : null
+            UsedCharacters = session.UsedCharacters.ToList(),
+            Score = session.CalculateScore()
         };
     }
 

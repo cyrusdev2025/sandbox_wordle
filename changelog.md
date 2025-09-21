@@ -16,3 +16,9 @@
 - frontend
 - session validation and resume functionality
 
+# [0.3.0]
+- added task3 (host cheating mode)
+## Added
+- cheating wordle logic(score and selection)
+- frontend(score for display)
+
