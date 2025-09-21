@@ -13,3 +13,19 @@ task 1 is a C# console application that implements a wordle game.
 ## setup instruction
 - navigate to the task1 directory
 - dotnet run
+
+## Task 2
+task 2 is a client and server side application. 
+- The server side is dotnet core web api
+- The client side is angular
+- There are configuration files for both the server and client side, hence you need to modify for both of them.
+- Session is implemented using memory cache. 
+- Memory cache is used to store the session data, and the cleanup will be handled by the framework.
+- User can resume to the game if it has a valid session in the local storage => redirect to the game page. 
+
+## setup instruction
+- navigate to the task2\backend directory
+- dotnet run
+- navigate to the task2\frontend directory
+- npm install
+- ng serve

@@ -1,2 +1,6 @@
 obj
 bin
+.vscode
+.angular
+node_modules
+net9.0

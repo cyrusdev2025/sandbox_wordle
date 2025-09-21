@@ -1,0 +1,30 @@
+<!-- Wordle Game Home Page -->
+<div class="wordle-container">
+  <header class="header">
+    <h1 class="title">WORDLE</h1>
+    <p class="subtitle">Guess the 5-letter word in {{ maxTrials }} tries</p>
+  </header>
+
+  <main class="home-content">
+    <div class="game-info">
+      <p class="info-text">
+        Welcome to Wordle! Click the button below to start a new game.
+        You have {{ maxTrials }} attempts to guess the correct 5-letter word.
+      </p>
+    </div>
+
+    <button class="start-button" (click)="startNewGame()" [disabled]="isLoading">
+      @if (isLoading) {
+        Starting...
+      } @else {
+        Start New Game
+      }
+    </button>
+
+    @if (errorMessage) {
+      <div class="error">
+        {{ errorMessage }}
+      </div>
+    }
+  </main>
+</div>

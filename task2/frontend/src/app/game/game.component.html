@@ -1,0 +1,120 @@
+<!-- Wordle Game Page -->
+<div class="game-container">
+  <header class="game-header">
+    <h1 class="game-title">WORDLE</h1>
+    <div class="game-stats">
+      <span class="session-id">Session: {{ sessionId.substring(0, 8) }}...</span>
+      <span class="trials-remaining">Remaining: {{ remainingTrials }}/{{ maxTrials }}</span>
+    </div>
+  </header>
+
+  <main class="game-content">
+    <!-- Game Board -->
+    <div class="game-board">
+      <!-- Previous Guesses -->
+      <div class="guess-row" *ngFor="let guess of guesses; let i = index">
+        <div class="letter-cell filled" 
+             *ngFor="let letter of guess.split(''); let j = index"
+             [ngClass]="getLetterClass(i, j)">
+          {{ letter.toUpperCase() }}
+        </div>
+      </div>
+
+      <!-- Current Guess Row -->
+      <div class="guess-row current" *ngIf="!gameOver">
+        <div class="letter-cell" 
+             *ngFor="let i of [0,1,2,3,4]"
+             [class.filled]="currentGuess[i]">
+          {{ currentGuess[i] ? currentGuess[i].toUpperCase() : '' }}
+        </div>
+      </div>
+
+      <!-- Empty Rows -->
+      <div class="guess-row" 
+           *ngFor="let i of getEmptyRows()"
+           [class.hidden]="gameOver">
+        <div class="letter-cell" *ngFor="let j of [0,1,2,3,4]"></div>
+      </div>
+    </div>
+
+    <!-- Current Guess Input -->
+    <div class="current-guess-display" *ngIf="!gameOver">
+      <h3>Current Guess: {{ currentGuess.toUpperCase() }}</h3>
+      <p class="guess-length">{{ currentGuess.length }}/5 letters</p>
+    </div>
+
+    <!-- Virtual Keyboard -->
+    <div class="keyboard" *ngIf="!gameOver">
+      <!-- First row: QWERTYUIOP -->
+      <div class="keyboard-row">
+        <button class="key-button" 
+                *ngFor="let letter of keyboardRows[0]"
+                [ngClass]="getKeyClass(letter)"
+                (click)="onLetterClick(letter.toLowerCase())">
+          {{ letter }}
+        </button>
+      </div>
+      <!-- Second row: ASDFGHJKL -->
+      <div class="keyboard-row">
+        <button class="key-button" 
+                *ngFor="let letter of keyboardRows[1]"
+                [ngClass]="getKeyClass(letter)"
+                (click)="onLetterClick(letter.toLowerCase())">
+          {{ letter }}
+        </button>
+      </div>
+      <!-- Third row: ENTER + ZXCVBNM + BACKSPACE -->
+      <div class="keyboard-row">
+        <button class="key-button special" (click)="onSubmitGuess()" 
+                [disabled]="currentGuess.length !== 5 || isLoading">
+          {{ isLoading ? 'SUBMITTING...' : 'ENTER' }}
+        </button>
+        <button class="key-button" 
+                *ngFor="let letter of keyboardRows[2]"
+                [ngClass]="getKeyClass(letter)"
+                (click)="onLetterClick(letter.toLowerCase())">
+          {{ letter }}
+        </button>
+        <button class="key-button special" (click)="onBackspace()">
+          ⌫
+        </button>
+      </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over" *ngIf="gameOver">
+      <h2 class="game-over-title">{{ isWon ? 'Congratulations!' : 'Game Over!' }}</h2>
+      <p class="game-over-message">
+        {{ isWon ? 'You guessed the word!' : 'Better luck next time!' }}
+      </p>
+      <div class="game-over-stats">
+        <p>Guesses used: {{ guesses.length }}/{{ maxTrials }}</p>
+        <p>Your guesses: {{ guesses.join(', ').toUpperCase() }}</p>
+      </div>
+      <button class="new-game-button" (click)="startNewGame()">
+        Start New Game
+      </button>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+  </main>
+
+  <!-- Popup Modal -->
+  <div class="popup-overlay" *ngIf="showPopup" (click)="closePopup()">
+    <div class="popup-content" (click)="$event.stopPropagation()">
+      <h2 class="popup-title">{{ popupTitle }}</h2>
+      <p class="popup-message">{{ popupMessage }}</p>
+      <div class="popup-actions">
+        <button class="popup-button primary" (click)="tryAgain()">
+          Try Again
+        </button>
+        <button class="popup-button secondary" (click)="closePopup()">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

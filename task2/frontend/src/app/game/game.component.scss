@@ -1,0 +1,407 @@
+.game-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  background-color: #ffffff;
+  color: #000000;
+  min-height: 100vh;
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #cccccc;
+  padding-bottom: 20px;
+}
+
+.game-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  letter-spacing: 0.2em;
+  margin: 0 0 10px 0;
+  color: #000000;
+}
+
+.game-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #818384;
+  margin-top: 10px;
+}
+
+.session-id, .trials-remaining {
+  background-color: #f0f0f0;
+  color: #333333;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.game-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.game-board {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.guess-row {
+  display: flex;
+  gap: 5px;
+  
+  &.hidden {
+    opacity: 0.3;
+  }
+  
+  &.current {
+    border: 2px solid #565758;
+    border-radius: 4px;
+    padding: 2px;
+  }
+}
+
+.letter-cell {
+  width: 62px;
+  height: 62px;
+  border: 2px solid #cccccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  background-color: #ffffff;
+  color: #000000;
+  
+  &.filled {
+    border-color: #999999;
+    background-color: #f0f0f0;
+  }
+  
+  // Wordle feedback colors
+  &.correct {
+    background-color: #6aaa64;
+    border-color: #6aaa64;
+    color: #ffffff;
+  }
+  
+  &.present {
+    background-color: #c9b458;
+    border-color: #c9b458;
+    color: #ffffff;
+  }
+  
+  &.absent {
+    background-color: #787c7e;
+    border-color: #787c7e;
+    color: #ffffff;
+  }
+}
+
+.current-guess-display {
+  text-align: center;
+  margin: 20px 0;
+  
+  h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.5rem;
+    color: #000000;
+  }
+  
+  .guess-length {
+    margin: 0;
+    color: #818384;
+    font-size: 0.9rem;
+  }
+}
+
+.keyboard {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 8px;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  
+  &:nth-child(2) {
+    padding: 0 15px; // Offset middle row slightly
+  }
+}
+
+.key-button {
+  min-width: 43px;
+  height: 58px;
+  border: none;
+  border-radius: 6px;
+  background-color: #d3d6da;
+  color: #1a1a1b;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  
+  &:hover:not(:disabled) {
+    background-color: #bbbfc4;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:disabled {
+    background-color: #f3f3f3;
+    color: #999999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  &.special {
+    min-width: 65px;
+    font-size: 0.75rem;
+    background-color: #818384;
+    color: #ffffff;
+    font-weight: 600;
+    
+    &:hover:not(:disabled) {
+      background-color: #6e7071;
+    }
+  }
+  
+  // Keyboard feedback colors
+  &.key-correct {
+    background-color: #6aaa64;
+    color: #ffffff;
+    
+    &:hover:not(:disabled) {
+      background-color: #5a9a54;
+    }
+  }
+  
+  &.key-present {
+    background-color: #c9b458;
+    color: #ffffff;
+    
+    &:hover:not(:disabled) {
+      background-color: #b9a448;
+    }
+  }
+  
+  &.key-absent {
+    background-color: #787c7e;
+    color: #ffffff;
+    
+    &:hover:not(:disabled) {
+      background-color: #686c6e;
+    }
+  }
+}
+
+.game-over {
+  text-align: center;
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  padding: 30px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.game-over-title {
+  font-size: 2rem;
+  margin: 0 0 15px 0;
+  color: #000000;
+}
+
+.game-over-message {
+  font-size: 1.2rem;
+  margin: 0 0 20px 0;
+  color: #818384;
+}
+
+.game-over-stats {
+  margin: 20px 0;
+  
+  p {
+    margin: 5px 0;
+    color: #333333;
+    font-size: 0.9rem;
+  }
+}
+
+.new-game-button {
+  background-color: #538d4e;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  
+  &:hover {
+    background-color: #466940;
+  }
+  
+  &:active {
+    background-color: #3a5a34;
+  }
+}
+
+.error-message {
+  background-color: #b91c1c;
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 4px;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+// Popup Modal Styles
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.popup-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0 0 15px 0;
+  color: #000000;
+}
+
+.popup-message {
+  font-size: 1.1rem;
+  margin: 0 0 25px 0;
+  color: #333333;
+  line-height: 1.4;
+}
+
+.popup-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.popup-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &.primary {
+    background-color: #6aaa64;
+    color: #ffffff;
+    
+    &:hover {
+      background-color: #5a9a54;
+    }
+  }
+  
+  &.secondary {
+    background-color: #f0f0f0;
+    color: #333333;
+    
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 600px) {
+  .game-container {
+    padding: 10px;
+  }
+  
+  .game-title {
+    font-size: 2rem;
+  }
+  
+  .letter-cell {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+  
+  .keyboard {
+    max-width: 100%;
+    padding: 0 4px;
+  }
+  
+  .keyboard-row {
+    gap: 4px;
+    
+    &:nth-child(2) {
+      padding: 0 8px;
+    }
+  }
+  
+  .key-button {
+    min-width: 28px;
+    height: 48px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+  }
+  
+  .key-button.special {
+    min-width: 48px;
+    font-size: 0.65rem;
+  }
+  
+  .popup-content {
+    padding: 20px;
+    max-width: 350px;
+  }
+  
+  .popup-actions {
+    flex-direction: column;
+    gap: 10px;
+    
+    .popup-button {
+      width: 100%;
+    }
+  }
+}

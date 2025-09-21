@@ -1,0 +1,101 @@
+:host {
+  --wordle-green: #6aaa64;
+  --wordle-yellow: #c9b458;
+  --wordle-gray: #787c7e;
+  --wordle-dark-gray: #3a3a3c;
+  --wordle-light-gray: #d3d6da;
+  --wordle-white: #ffffff;
+  --wordle-black: #212529;
+
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.wordle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--wordle-white);
+  padding: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--wordle-light-gray);
+  padding-bottom: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--wordle-black);
+  margin: 0;
+  letter-spacing: 0.2rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--wordle-gray);
+  margin: 10px 0 0 0;
+}
+
+.home-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.start-button {
+  background-color: var(--wordle-green);
+  color: var(--wordle-white);
+  border: none;
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-width: 200px;
+}
+
+.start-button:hover {
+  background-color: #5a9a54;
+}
+
+.start-button:disabled {
+  background-color: var(--wordle-gray);
+  cursor: not-allowed;
+}
+
+.game-info {
+  text-align: center;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--wordle-light-gray);
+}
+
+.info-text {
+  color: var(--wordle-gray);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.error {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ffcdd2;
+  margin: 10px 0;
+}
