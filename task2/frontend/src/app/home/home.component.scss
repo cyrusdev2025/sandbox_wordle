@@ -51,9 +51,14 @@
   margin: 0;
 }
 
+.button-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .start-button {
-  background-color: #538d4e;
-  color: #ffffff;
   border: none;
   padding: 16px 32px;
   border-radius: 8px;
@@ -64,24 +69,45 @@
   min-width: 200px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   
-  &:hover:not(:disabled) {
-    background-color: #466940;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  &.single-player {
+    background-color: #538d4e;
+    color: #ffffff;
+    
+    &:hover:not(:disabled) {
+      background-color: #466940;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    &:active:not(:disabled) {
+      background-color: #3a5a34;
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    &:disabled {
+      background-color: #3a3a3c;
+      color: #818384;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
   }
-  
-  &:active:not(:disabled) {
-    background-color: #3a5a34;
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-  
-  &:disabled {
-    background-color: #3a3a3c;
-    color: #818384;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+
+  &.multiplayer {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: #ffffff;
+    
+    &:hover {
+      background: linear-gradient(45deg, #5a6fd8, #6a4190);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    }
   }
 }
 

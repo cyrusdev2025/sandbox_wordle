@@ -21,7 +21,7 @@ public class GameSessionService : IGameSessionService
         _logger = logger;
     }
 
-    public async Task<StartGameResponse> StartGameAsync(StartGameRequest? request = null)
+    public Task<StartGameResponse> StartGameAsync(StartGameRequest? request = null)
     {
         var sessionId = Guid.NewGuid().ToString();
         var sessionTimeoutMinutes = int.Parse(_configuration["SESSION_TIMEOUT_MINUTES"] ?? "30");
@@ -56,12 +56,12 @@ public class GameSessionService : IGameSessionService
 
         _logger.LogInformation("New game session created: {SessionId}", sessionId);
 
-        return new StartGameResponse
+        return Task.FromResult(new StartGameResponse
         {
             SessionId = sessionId,
             MaxTrials = maxTrials,
             ExpiresAt = session.ExpiresAt
-        };
+        });
     }
 
     public async Task<ValidateSessionResponse> ValidateSessionAsync(string sessionId)
@@ -120,7 +120,7 @@ public class GameSessionService : IGameSessionService
         };
     }
 
-    public async Task<SubmitGuessResponse> SubmitGuessAsync(SubmitGuessRequest request)
+    public Task<SubmitGuessResponse> SubmitGuessAsync(SubmitGuessRequest request)
     {
         if (!_cache.TryGetValue(request.SessionId, out GameSession? session) || session == null)
         {
@@ -213,7 +213,7 @@ public class GameSessionService : IGameSessionService
         _logger.LogInformation("Guess submitted for session {SessionId}: {Guess} -> {IsCorrect}", 
             request.SessionId, guess, isCorrect);
 
-        return new SubmitGuessResponse
+        return Task.FromResult(new SubmitGuessResponse
         {
             Feedback = feedback,
             IsCorrect = isCorrect,
@@ -222,7 +222,7 @@ public class GameSessionService : IGameSessionService
             RemainingTrials = session.MaxTrials - session.Guesses.Count,
             UsedCharacters = session.UsedCharacters.ToList(),
             Score = session.CalculateScore()
-        };
+        });
     }
 
     public async Task CleanupExpiredSessionsAsync()

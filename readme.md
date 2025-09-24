@@ -42,3 +42,34 @@ task 3 is implementing a cheating mode in the game.
 - navigate to the task2\frontend directory
 - npm install
 - ng serve
+
+## Task 4
+task 4 is implementing a multiplayer mode in the game.
+- Multiplayer mode is for 2 players to play against each other.(only support for 2 players at most)
+- The players will take turn to guess the same word.
+- The system will select the best answer from the candidates to maximize difficulty.(cheating mode)
+- score is calculated based on the number of hits and presents. (no of hit * 2 + no of present)
+- The game will be overed when one of the players guessed the word correctly or the maximum number of trials is reached.
+
+## setup instruction
+- navigate to the task2\backend directory
+- dotnet run
+- navigate to the task2\frontend directory
+- npm install
+- ng serve
+
+## Features
+- support single player mode or multplayer mode
+- single player mode implement session to resume the game
+- system running in host cheating mode to maximumize the difficulty
+- multplayer mode implement signalR to real time update the game state(feedback of opponents)
+
+## Design trade-offs
+- multplayer mode only supports 2 players at most rather than a server to handle multiple games 
+=> easier for implementation (no need for handling multiple games' state and players' state)
+=> less resource usage (as the server operate without a database, the in-memory cache will be heavier to handle multiple games)
+
+## Future Work
+- implement a database for handling multiple games(games' state and players' state)
+- room matching for multiplayer mode(room code for each game)
+- add a highest score board for past games

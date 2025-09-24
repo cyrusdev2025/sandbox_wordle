@@ -71,4 +71,9 @@ export class HomeComponent implements OnInit {
       this.isLoading = false;
     }
   }
+
+  // Navigate to multiplayer
+  startMultiplayer() {
+    this.router.navigate(['/multiplayer']);
+  }
 }

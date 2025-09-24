@@ -22,3 +22,8 @@
 - cheating wordle logic(score and selection)
 - frontend(score for display)
 
+# [0.4.0]
+- added task4 (multiplayer mode)
+## Added
+- multiplayer mode(handle 2 players at most)
+- signalR for real time updates(feedback and game state)

@@ -1,0 +1,282 @@
+<!-- Multiplayer Wordle Game -->
+<div class="multiplayer-container">
+  
+  <!-- Join Game View -->
+  <div class="join-view" *ngIf="currentView === 'join'">
+    <header class="header">
+      <h1 class="title">MULTIPLAYER WORDLE</h1>
+      <p class="subtitle">Play against another player in real-time</p>
+    </header>
+
+    <!-- Game Rules -->
+    <div class="rules-section">
+      <h3>Game Rules</h3>
+      <ol class="rules-list">
+        <li>Each player takes turn to guess the same word</li>
+        <li>Hit = 2, Present = 1, Miss = 0. The highest score in a round will be your final score
+          <br><span class="color-guide">(🟩 Green = Hit, 🟨 Yellow = Present, ⬜ Grey = Miss)</span>
+        </li>
+        <li>You can only see the feedback color of opponents</li>
+        <li>Game will be over if one of the player can guess the answer or reach the maximum rounds</li>
+      </ol>
+    </div>
+
+    <div class="join-form">
+      <h2>Join Game</h2>
+      <p>Enter your name to find an opponent</p>
+
+      <div class="form-group">
+        <label for="playerName">Your Name</label>
+        <input 
+          type="text" 
+          id="playerName"
+          [(ngModel)]="inputPlayerName"
+          placeholder="Enter your name"
+          maxlength="20"
+          [disabled]="isLoading"
+          (keyup.enter)="joinGame()"
+        />
+      </div>
+
+      <div class="form-actions">
+        <button 
+          class="action-button primary"
+          (click)="joinGame()"
+          [disabled]="isLoading || !inputPlayerName.trim()"
+        >
+          {{ isLoading ? 'Joining...' : 'Find Opponent' }}
+        </button>
+        
+        <button 
+          class="action-button secondary"
+          (click)="goHome()"
+          [disabled]="isLoading"
+        >
+          Back to Home
+        </button>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Waiting for Opponent View -->
+  <div class="waiting-view" *ngIf="currentView === 'waiting'">
+    <header class="header">
+      <h1 class="title">MULTIPLAYER WORDLE</h1>
+    </header>
+
+    <div class="waiting-section">
+      <div class="waiting-icon">⏳</div>
+      <h2>Waiting for Opponent</h2>
+      <p>Looking for another player to join...</p>
+      
+      <div class="player-info">
+        <h3>{{ playerName }}</h3>
+        <p>You're in the queue!</p>
+        <p class="rules-note">📋 Game rules will be shown once the match starts</p>
+      </div>
+
+      <button class="action-button secondary" (click)="goHome()">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- Waiting for Opponent to Submit View -->
+  <div class="waiting-opponent-view" *ngIf="currentView === 'waitingForOpponent'">
+    <header class="header">
+      <h1 class="title">MULTIPLAYER WORDLE</h1>
+    </header>
+
+    <div class="waiting-section">
+      <div class="waiting-icon">⏳</div>
+      <h2>Waiting for Opponent</h2>
+      <p>You submitted: <strong>{{ mySubmittedGuess.toUpperCase() }}</strong></p>
+      <p>Waiting for {{ opponent?.playerName || 'opponent' }} to submit their guess...</p>
+      <div class="loading-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Playing View -->
+  <div class="playing-view" *ngIf="currentView === 'playing'">
+    <header class="game-header">
+      <h1 class="title">MULTIPLAYER WORDLE</h1>
+      
+      <!-- Game Rules -->
+      <div class="rules-section game-rules">
+        <h3>Game Rules</h3>
+        <ol class="rules-list">
+          <li>Each player takes turn to guess the same word</li>
+          <li>Hit = 2, Present = 1, Miss = 0. The highest score in a round will be your final score
+            <br><span class="color-guide">(🟩 Green = Hit, 🟨 Yellow = Present, ⬜ Grey = Miss)</span>
+          </li>
+          <li>You can only see the feedback color of opponents</li>
+          <li>Game will be over if one of the player can guess the answer or reach the maximum rounds</li>
+        </ol>
+      </div>
+      
+      <div class="players-info">
+        <div class="player-card you">
+          <span class="player-name">{{ playerName }} (You)</span>
+          <span class="player-score">Best: {{ currentPlayer?.score || 0 }} pts</span>
+          <span class="player-round" *ngIf="(currentPlayer?.bestRound || 0) > 0">Round {{ currentPlayer?.bestRound }}</span>
+        </div>
+        <div class="vs">VS</div>
+        <div class="player-card opponent">
+          <span class="player-name">{{ opponent?.playerName || 'Opponent' }}</span>
+          <span class="player-score">Best: {{ opponent?.score || 0 }} pts</span>
+          <span class="player-round" *ngIf="(opponent?.bestRound || 0) > 0">Round {{ opponent?.bestRound }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Compact Rules Reminder -->
+    <div class="rules-reminder">
+      <span class="scoring">🟩 Hit=2 🟨 Present=1 ⬜ Miss=0</span>
+      <span class="separator">•</span>
+      <span class="info">Turn-based • Colors only for opponent</span>
+    </div>
+
+    <div class="game-boards">
+      <!-- Your Board -->
+      <div class="board-section">
+        <h3>Your Guesses</h3>
+        <div class="wordle-grid">
+          <!-- Past guesses -->
+          <div class="guess-row" *ngFor="let guess of currentPlayer?.guesses; let i = index">
+            <div 
+              class="letter-cell" 
+              *ngFor="let letter of guess.split(''); let j = index"
+              [class]="getLetterClass(i, j)"
+            >
+              {{ letter.toUpperCase() }}
+            </div>
+          </div>
+
+          <!-- Current guess row -->
+          <div class="guess-row current" *ngIf="!isGameCompleted">
+            <div 
+              class="letter-cell" 
+              *ngFor="let letter of currentGuess.split(''); let j = index"
+            >
+              {{ letter.toUpperCase() }}
+            </div>
+            <div 
+              class="letter-cell empty" 
+              *ngFor="let empty of getEmptyLetterCells()"
+            >
+            </div>
+          </div>
+
+          <!-- Empty rows -->
+          <div class="guess-row" *ngFor="let empty of getEmptyRows()">
+            <div class="letter-cell empty" *ngFor="let cell of getFiveEmptyCells()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opponent Board (Colors Only) -->
+      <div class="board-section opponent-board">
+        <h3>Opponent's Progress</h3>
+        <div class="wordle-grid">
+          <!-- Opponent's guesses (colors only) -->
+          <div class="guess-row" *ngFor="let guessColors of opponentGuesses; let i = index">
+            <div 
+              class="letter-cell opponent-cell" 
+              *ngFor="let color of guessColors; let j = index"
+              [ngClass]="normalizeOpponentFeedback(color)"
+            >
+              <!-- No letter content, just colored background -->
+            </div>
+          </div>
+
+          <!-- Empty rows for opponent -->
+          <div class="guess-row" *ngFor="let empty of getOpponentEmptyRows()">
+            <div class="letter-cell empty" *ngFor="let cell of getFiveEmptyCells()"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Virtual Keyboard -->
+    <div class="keyboard" *ngIf="!isGameCompleted">
+      <div class="keyboard-row" *ngFor="let row of keyboardRows">
+        <button 
+          class="key" 
+          *ngFor="let letter of row"
+          [class]="getKeyClass(letter)"
+          (click)="onLetterClick(letter.toLowerCase())"
+        >
+          {{ letter }}
+        </button>
+      </div>
+      
+      <div class="keyboard-row">
+        <button class="key wide" (click)="onSubmitGuess()" [disabled]="currentGuess.length !== 5 || isWaitingForOpponent">
+          {{ isWaitingForOpponent ? 'WAIT...' : 'ENTER' }}
+        </button>
+        <button class="key wide" (click)="onBackspace()">
+          ⌫
+        </button>
+      </div>
+    </div>
+
+    <!-- Game Status -->
+    <div class="game-status" *ngIf="isGameCompleted">
+      <h3>Game Over!</h3>
+      <p>{{ getGameOverMessage() }}</p>
+    </div>
+  </div>
+
+  <!-- Game Completed View -->
+  <div class="completed-view" *ngIf="currentView === 'completed'">
+    <header class="header">
+      <h1 class="title">GAME COMPLETE!</h1>
+    </header>
+
+    <div class="results-section">
+      <div class="final-scores">
+        <div class="score-card" 
+             [class.winner]="gameState?.winnerId === playerId"
+             [class.tie]="!gameState?.winnerId">
+          <h3>{{ playerName }} {{ gameState?.winnerId === playerId ? '🏆' : (!gameState?.winnerId ? '🤝' : '') }}</h3>
+          <p>Best Score: {{ currentPlayer?.score || 0 }} pts</p>
+          <p *ngIf="(currentPlayer?.bestRound || 0) > 0">Achieved in Round {{ currentPlayer?.bestRound }}</p>
+          <p>Total Guesses: {{ currentPlayer?.guessCount || currentPlayer?.guesses?.length || 0 }}</p>
+        </div>
+        
+        <div class="score-card" 
+             [class.winner]="gameState?.winnerId === opponent?.playerId"
+             [class.tie]="!gameState?.winnerId">
+          <h3>{{ opponent?.playerName || 'Opponent' }} {{ gameState?.winnerId === opponent?.playerId ? '🏆' : (!gameState?.winnerId ? '🤝' : '') }}</h3>
+          <p>Best Score: {{ opponent?.score || 0 }} pts</p>
+          <p *ngIf="(opponent?.bestRound || 0) > 0">Achieved in Round {{ opponent?.bestRound }}</p>
+          <p>Total Guesses: {{ opponent?.guessCount || opponent?.guesses?.length || 0 }}</p>
+        </div>
+      </div>
+
+      <div class="result-message">
+        <h2 *ngIf="gameState?.winnerId === playerId">🎉 You Won!</h2>
+        <h2 *ngIf="gameState?.winnerId === opponent?.playerId">😔 You Lost</h2>
+        <h2 *ngIf="!gameState?.winnerId">🤝 It's a Tie!</h2>
+      </div>
+
+      <div class="action-buttons">
+        <button class="action-button primary" (click)="startNewGame()">
+          Play Again
+        </button>
+        <button class="action-button secondary" (click)="goHome()">
+          Back to Home
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

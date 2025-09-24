@@ -4,6 +4,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IGameSessionService, GameSessionService>();
+builder.Services.AddScoped<IMultiplayerService, MultiplayerService>();
+
+// Add SignalR
+builder.Services.AddSignalR();
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -12,7 +16,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials(); // Required for SignalR
     });
 });
 
@@ -77,5 +82,56 @@ app.MapPost("/submit", async (SubmitGuessRequest request, IGameSessionService ga
         return Results.Problem($"Failed to submit guess: {ex.Message}");
     }
 });
+
+// Multiplayer API Endpoints
+app.MapPost("/multiplayer/join", async (JoinGameRequest request, IMultiplayerService multiplayerService) =>
+{
+    try
+    {
+        var response = await multiplayerService.JoinGameAsync(request);
+        return Results.Ok(response);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Failed to join game: {ex.Message}");
+    }
+});
+
+app.MapGet("/multiplayer/game/{gameId}", async (string gameId, IMultiplayerService multiplayerService) =>
+{
+    try
+    {
+        var gameState = await multiplayerService.GetGameStateAsync(gameId);
+        return gameState != null ? Results.Ok(gameState) : Results.NotFound("Game not found");
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Failed to get game state: {ex.Message}");
+    }
+});
+
+app.MapPost("/multiplayer/guess", async (MultiplayerGuessRequest request, IMultiplayerService multiplayerService) =>
+{
+    try
+    {
+        var response = await multiplayerService.SubmitGuessAsync(request);
+        return Results.Ok(response);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Failed to submit guess: {ex.Message}");
+    }
+});
+
+// Map SignalR Hub
+app.MapHub<MultiplayerHub>("/multiplayerhub");
 
 app.Run();

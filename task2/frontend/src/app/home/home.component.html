@@ -13,13 +13,19 @@
       </p>
     </div>
 
-    <button class="start-button" (click)="startNewGame()" [disabled]="isLoading">
-      @if (isLoading) {
-        Starting...
-      } @else {
-        Start New Game
-      }
-    </button>
+    <div class="button-group">
+      <button class="start-button single-player" (click)="startNewGame()" [disabled]="isLoading">
+        @if (isLoading) {
+          Starting...
+        } @else {
+          Single Player
+        }
+      </button>
+
+      <button class="start-button multiplayer" (click)="startMultiplayer()">
+        Multiplayer
+      </button>
+    </div>
 
     @if (errorMessage) {
       <div class="error">
